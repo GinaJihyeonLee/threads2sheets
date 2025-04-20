@@ -7,8 +7,8 @@ Threads API로 가져온 내 포스트와 인사이트를 Google Sheets에 동�
 - 지정한 날짜 범위 내 Threads 포스트 조회  
 - 조회수, 좋아요, 댓글, 리포스트, 인용, 공유 메트릭 수집  
 - 기존 행 업데이트 또는 신규 행 추가  
-- 가독성 향상 포맷 적용
-- sheet(tab) 별로 연도/월 등을 분리하여 관리 가능
+- 시각적 가독성을 높이기 위한 포맷 자동 적용  
+- 연도/월별 등으로 시트를 구분하여 탭 단위로 데이터 관리 가능
 
 ## 사용법
 
@@ -41,29 +41,24 @@ Threads API로 가져온 내 포스트와 인사이트를 Google Sheets에 동�
      --limit        100
    ```
 
-물론입니다! `###` 대신 `-` 기준으로 구조를 바꾼 버전은 아래와 같습니다:
-
----
-
 ## 파라미터 설명
 
 - **`--access-token`**  
-  Threads API를 사용하려면 Access Token이 필요합니다.  
-  발급 과정이 다소 복잡할 수 있으나, 아래 블로그에 자세히 설명되어 있습니다:  
+  Threads API를 사용하기 위해 필요한 인증 토큰입니다.  
+  발급 절차가 다소 복잡하지만, 아래 블로그에 상세히 안내되어 있습니다:  
   👉 [https://carsleeper.tistory.com/5](https://carsleeper.tistory.com/5)
 
 - **`--creds-json`**  
-  Google Sheets API를 사용하기 위한 인증 정보가 담긴 파일입니다.  
-  Google Cloud Console에서 서비스 계정을 생성하고 인증 정보를 발급받은 후, 사용하려는 Google Sheet 문서에 서비스 계정의 이메일을 **공유자**로 추가해야 합니다.  
-  자세한 절차는 다음 블로그에서 확인할 수 있습니다.
+  Google Sheets API를 사용하기 위한 인증 정보입니다.  
+  Google Cloud Console에서 서비스 계정을 생성하고 인증 파일을 발급받은 뒤, 사용하려는 Google Sheet 문서에 해당 서비스 계정 이메일을 **공유자**로 추가해야 합니다.  
+  자세한 과정은 아래 블로그를 참고하세요:  
   👉 [https://posbar.tistory.com/260](https://posbar.tistory.com/260)
 
 - **`--spreadsheet-id`**  
-  Google Spreadsheet의 고유 ID입니다.
+  Google Spreadsheet의 고유 ID입니다. 아래 URL의 경우, `spreadsheet-id` 값은 `1234`입니다.
   ```
   https://docs.google.com/spreadsheets/d/1234/edit#gid=567
   ```
-  위 URL의 경우, `spreadsheet-id` 값은 `1234`입니다.  
 
 - **`--worksheet`**  
   Google Sheet 문서 내 개별 탭(Tab)의 이름을 입력합니다.  
@@ -78,7 +73,7 @@ Threads API로 가져온 내 포스트와 인사이트를 Google Sheets에 동�
 
 ## Scheduling
 
-GitHub Actions로 자동화 가능
+GitHub Actions로 자동화 가능합니다.
 
 
 ## License
