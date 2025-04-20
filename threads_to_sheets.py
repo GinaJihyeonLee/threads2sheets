@@ -180,7 +180,7 @@ def update_sheet(stats, sheet, service, spreadsheet_id, worksheet_name):
                 [
                     idx,
                     ts_str,
-                    post.get("text", "")[:100],
+                    post.get("text", ""),
                     "",
                     *[
                         post.get(m, 0)
@@ -269,7 +269,22 @@ def apply_formatting(sheet, service, spreadsheet_id, worksheet_name, start_idx):
                 "fields": "userEnteredFormat.horizontalAlignment"
             }
         },
-        # 3) Bold header row
+        # 3) Lock row height
+        {
+            "updateDimensionProperties": {
+                "range": {
+                    "sheetId": sheet_id,
+                    "dimension": "ROWS",
+                    "startIndex": 1,
+                    "endIndex": last_idx,
+                },
+                "properties": {
+                    "pixelSize": 100
+                },
+                "fields": "pixelSize"
+            }
+        },
+        # 4) Bold header row
         {
             "repeatCell": {
                 "range": {
@@ -287,7 +302,7 @@ def apply_formatting(sheet, service, spreadsheet_id, worksheet_name, start_idx):
                 "fields": "userEnteredFormat.textFormat.bold"
             }
         },
-        # 4) Topic dropdown (column D)
+        # 5) Topic dropdown (column D)
         {
             "setDataValidation": {
                 "range": {
@@ -307,7 +322,7 @@ def apply_formatting(sheet, service, spreadsheet_id, worksheet_name, start_idx):
                 },
             }
         },
-        # 5) Conditional formatting for views > 10000
+        # 6) Conditional formatting for views > 10000
         {
             "addConditionalFormatRule": {
                 "rule": {
@@ -323,14 +338,14 @@ def apply_formatting(sheet, service, spreadsheet_id, worksheet_name, start_idx):
                             "values": [{"userEnteredValue": "10000"}]
                         },
                         "format": {
-                            "backgroundColor": {"red": 1.0, "green": 0.5, "blue": 0.5}
+                            "backgroundColor": {"red": 1.0000, "green": 0.7765, "blue": 0.7922}
                         }
                     }
                 },
                 "index": 0
             }
         },
-        # 6) Conditional formatting for 5000 ≤ views ≤ 10000
+        # 7) Conditional formatting for 5000 ≤ views ≤ 10000
         {
             "addConditionalFormatRule": {
                 "rule": {
@@ -346,7 +361,7 @@ def apply_formatting(sheet, service, spreadsheet_id, worksheet_name, start_idx):
                             "values": [{"userEnteredValue": "5000"}, {"userEnteredValue": "10000"}]
                         },
                         "format": {
-                            "backgroundColor": {"red": 1.0, "green": 0.75, "blue": 0.8}
+                            "backgroundColor": {"red": 1.0000, "green": 0.8980, "blue": 0.9059}
                         }
                     }
                 },
@@ -356,8 +371,8 @@ def apply_formatting(sheet, service, spreadsheet_id, worksheet_name, start_idx):
     ]
 
     dropdown_colors = {
-        "AI": {"red": 1.0, "green": 1.0, "blue": 0.6},
-        "Storytelling": {"red": 0.8, "green": 1.0, "blue": 0.8},
+        "AI": {"red": 1.0000, "green": 1.0000, "blue": 0.8745},
+        "Storytelling": {"red": 0.7843, "green": 0.9294, "blue": 0.9686},
     }
 
     color_rules = [
