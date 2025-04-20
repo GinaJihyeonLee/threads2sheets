@@ -237,7 +237,7 @@ def apply_formatting(sheet, service, spreadsheet_id, worksheet_name, start_idx):
                 "fields": "userEnteredFormat(horizontalAlignment,verticalAlignment)"
             }
         },
-        # 1) Left-align only column D (Topic)
+        # 1) Left-align only column C (Text)
         {
             "repeatCell": {
                 "range": {
