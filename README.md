@@ -41,6 +41,9 @@ Threads API로 가져온 내 포스트와 인사이트를 Google Sheets에 동�
      --limit        100
    ```
 
+5. Customization
+- Topic 종류 및 개수, filtering range, background color 등은 선호에 맞게 수정하여 사용하시면 됩니다.
+
 ## 파라미터 설명
 
 - **`--access-token`**  
