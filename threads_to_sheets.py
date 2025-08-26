@@ -55,10 +55,10 @@ def fetch_threads_posts(access_token, since, until=None, limit=100):
         "is_quote_post",
     ]
     params = {
+        "access_token": access_token,
         "fields": ",".join(fields),
         "since": since,
-        "limit": limit,
-        "access_token": access_token,
+        "limit": limit
     }
     if until:
         params["until"] = until
@@ -132,8 +132,7 @@ def update_sheet(stats, sheet, service, spreadsheet_id, worksheet_name):
         "Views",
         "Likes",
         "Replies",
-        "Reposts",
-        "Quotes",
+        "Reposts/Quotes",
         "Shares",
         "Permalink",
     ]
@@ -160,17 +159,20 @@ def update_sheet(stats, sheet, service, spreadsheet_id, worksheet_name):
                 post["timestamp"].replace("+0000", "+00:00")
             )
             .astimezone(KST)
-            .strftime("%Y-%m-%d %H:%M")
+            .strftime("%Y. %m. %d %H:%M")
         )
 
         if permalink in existing_map:
             row = existing_map[permalink]
             metrics = [
-                post.get(m, 0)
-                for m in ["views", "likes", "replies", "reposts", "quotes", "shares"]
+                post.get("views", 0),
+                post.get("likes", 0),
+                post.get("replies", 0),
+                post.get("reposts", 0) + post.get("quotes", 0),
+                post.get("shares", 0)
             ]
             sheet.update(
-                range_name=f"E{row}:J{row}",
+                range_name=f"E{row}:I{row}",
                 values=[metrics],
                 value_input_option="USER_ENTERED",
             )
@@ -179,20 +181,14 @@ def update_sheet(stats, sheet, service, spreadsheet_id, worksheet_name):
             new_rows.append(
                 [
                     idx,
-                    ts_str,
-                    post.get("text", ""),
+                    f"'{ts_str}",  # Add apostrophe to force text format
+                    post.get("text", "").split('\n')[0] if post.get("text") else "",
                     "",
-                    *[
-                        post.get(m, 0)
-                        for m in [
-                            "views",
-                            "likes",
-                            "replies",
-                            "reposts",
-                            "quotes",
-                            "shares",
-                        ]
-                    ],
+                    post.get("views", 0),
+                    post.get("likes", 0),
+                    post.get("replies", 0),
+                    post.get("reposts", 0) + post.get("quotes", 0),
+                    post.get("shares", 0),
                     permalink,
                 ]
             )
@@ -203,11 +199,11 @@ def update_sheet(stats, sheet, service, spreadsheet_id, worksheet_name):
     logging.info(f"Appended {len(new_rows)} new rows.")
 
     apply_formatting(
-        sheet, service, spreadsheet_id, worksheet_name, start_idx
+        sheet, service, spreadsheet_id, worksheet_name
     )
 
 
-def apply_formatting(sheet, service, spreadsheet_id, worksheet_name, start_idx):
+def apply_formatting(sheet, service, spreadsheet_id, worksheet_name):
     """
     Applies styling, dropdowns, and conditional formatting rules.
     """
@@ -258,8 +254,8 @@ def apply_formatting(sheet, service, spreadsheet_id, worksheet_name, start_idx):
             "repeatCell": {
                 "range": {
                     "sheetId": sheet_id,
-                    "startColumnIndex": 10,
-                    "endColumnIndex": 11,
+                    "startColumnIndex": 9,
+                    "endColumnIndex": 10,
                     "startRowIndex": 1                },
                 "cell": {
                     "userEnteredFormat": {
@@ -269,22 +265,145 @@ def apply_formatting(sheet, service, spreadsheet_id, worksheet_name, start_idx):
                 "fields": "userEnteredFormat.horizontalAlignment"
             }
         },
-        # 3) Lock row height
+        # 3) Set column widths
         {
             "updateDimensionProperties": {
                 "range": {
                     "sheetId": sheet_id,
-                    "dimension": "ROWS",
-                    "startIndex": 1,
-                    "endIndex": last_idx,
+                    "dimension": "COLUMNS",
+                    "startIndex": 3,  # Column D (Topic)
+                    "endIndex": 4
                 },
                 "properties": {
-                    "pixelSize": 100
+                    "pixelSize": 200
                 },
                 "fields": "pixelSize"
             }
         },
-        # 4) Bold header row
+        {
+            "updateDimensionProperties": {
+                "range": {
+                    "sheetId": sheet_id,
+                    "dimension": "COLUMNS",
+                    "startIndex": 4,  # Column E (Views)
+                    "endIndex": 5
+                },
+                "properties": {
+                    "pixelSize": 120
+                },
+                "fields": "pixelSize"
+            }
+        },
+        {
+            "updateDimensionProperties": {
+                "range": {
+                    "sheetId": sheet_id,
+                    "dimension": "COLUMNS",
+                    "startIndex": 5,  # Column F (Likes)
+                    "endIndex": 6
+                },
+                "properties": {
+                    "pixelSize": 120
+                },
+                "fields": "pixelSize"
+            }
+        },
+        {
+            "updateDimensionProperties": {
+                "range": {
+                    "sheetId": sheet_id,
+                    "dimension": "COLUMNS",
+                    "startIndex": 6,  # Column G (Replies)
+                    "endIndex": 7
+                },
+                "properties": {
+                    "pixelSize": 120
+                },
+                "fields": "pixelSize"
+            }
+        },
+        {
+            "updateDimensionProperties": {
+                "range": {
+                    "sheetId": sheet_id,
+                    "dimension": "COLUMNS",
+                    "startIndex": 7,  # Column H (Reposts/Quotes)
+                    "endIndex": 8
+                },
+                "properties": {
+                    "pixelSize": 120
+                },
+                "fields": "pixelSize"
+            }
+        },
+        {
+            "updateDimensionProperties": {
+                "range": {
+                    "sheetId": sheet_id,
+                    "dimension": "COLUMNS",
+                    "startIndex": 8,  # Column I (Shares)
+                    "endIndex": 9
+                },
+                "properties": {
+                    "pixelSize": 120
+                },
+                "fields": "pixelSize"
+            }
+        },
+        # Set widths for columns A, B, C
+        {
+            "updateDimensionProperties": {
+                "range": {
+                    "sheetId": sheet_id,
+                    "dimension": "COLUMNS",
+                    "startIndex": 0,  # Column A (Idx)
+                    "endIndex": 1
+                },
+                "properties": {
+                    "pixelSize": 50
+                },
+                "fields": "pixelSize"
+            }
+        },
+        {
+            "updateDimensionProperties": {
+                "range": {
+                    "sheetId": sheet_id,
+                    "dimension": "COLUMNS",
+                    "startIndex": 1,  # Column B (Date)
+                    "endIndex": 2
+                },
+                "properties": {
+                    "pixelSize": 150
+                },
+                "fields": "pixelSize"
+            }
+        },
+        {
+            "updateDimensionProperties": {
+                "range": {
+                    "sheetId": sheet_id,
+                    "dimension": "COLUMNS",
+                    "startIndex": 2,  # Column C (Text)
+                    "endIndex": 3
+                },
+                "properties": {
+                    "pixelSize": 600
+                },
+                "fields": "pixelSize"
+            }
+        },
+        {
+            "autoResizeDimensions": {
+                "dimensions": {
+                    "sheetId": sheet_id,
+                    "dimension": "COLUMNS",
+                    "startIndex": 9,
+                    "endIndex": 10
+                }
+            }
+        },
+        # 4) Style header row - light navy background, white text, bold, black borders
         {
             "repeatCell": {
                 "range": {
@@ -294,35 +413,43 @@ def apply_formatting(sheet, service, spreadsheet_id, worksheet_name, start_idx):
                 },
                 "cell": {
                     "userEnteredFormat": {
+                        "backgroundColor": {
+                            "red": 0.2,
+                            "green": 0.3,
+                            "blue": 0.6
+                        },
                         "textFormat": {
-                            "bold": True
+                            "bold": True,
+                            "foregroundColor": {
+                                "red": 1.0,
+                                "green": 1.0,
+                                "blue": 1.0
+                            }
+                        },
+                        "borders": {
+                            "top": {
+                                "style": "SOLID",
+                                "color": {"red": 0, "green": 0, "blue": 0}
+                            },
+                            "bottom": {
+                                "style": "SOLID",
+                                "color": {"red": 0, "green": 0, "blue": 0}
+                            },
+                            "left": {
+                                "style": "SOLID",
+                                "color": {"red": 0, "green": 0, "blue": 0}
+                            },
+                            "right": {
+                                "style": "SOLID",
+                                "color": {"red": 0, "green": 0, "blue": 0}
+                            }
                         }
                     }
                 },
-                "fields": "userEnteredFormat.textFormat.bold"
+                "fields": "userEnteredFormat(backgroundColor,textFormat,borders)"
             }
         },
-        # 5) Topic dropdown (column D)
-        {
-            "setDataValidation": {
-                "range": {
-                    "sheetId": sheet_id,
-                    "startRowIndex": start_idx,
-                    "endRowIndex": last_idx,
-                    "startColumnIndex": 3,
-                    "endColumnIndex": 4,
-                },
-                "rule": {
-                    "condition": {
-                        "type": "ONE_OF_LIST",
-                        "values": [{"userEnteredValue": v} for v in ["AI", "Storytelling"]],
-                    },
-                    "showCustomUi": True,
-                    "strict": True,
-                },
-            }
-        },
-        # 6) Conditional formatting for views > 10000
+        # 5) Conditional formatting for views > 10000 - light yellow background, red bold text
         {
             "addConditionalFormatRule": {
                 "rule": {
@@ -338,14 +465,18 @@ def apply_formatting(sheet, service, spreadsheet_id, worksheet_name, start_idx):
                             "values": [{"userEnteredValue": "10000"}]
                         },
                         "format": {
-                            "backgroundColor": {"red": 1.0000, "green": 0.7765, "blue": 0.7922}
+                            "backgroundColor": {"red": 1.0, "green": 1.0, "blue": 0.8},
+                            "textFormat": {
+                                "bold": True,
+                                "foregroundColor": {"red": 1.0, "green": 0.0, "blue": 0.0}
+                            }
                         }
                     }
                 },
                 "index": 0
             }
         },
-        # 7) Conditional formatting for 5000 ≤ views ≤ 10000
+        # 6) Conditional formatting for 5000 ≤ views ≤ 10000 - light red background, red bold text
         {
             "addConditionalFormatRule": {
                 "rule": {
@@ -361,7 +492,11 @@ def apply_formatting(sheet, service, spreadsheet_id, worksheet_name, start_idx):
                             "values": [{"userEnteredValue": "5000"}, {"userEnteredValue": "10000"}]
                         },
                         "format": {
-                            "backgroundColor": {"red": 1.0000, "green": 0.8980, "blue": 0.9059}
+                            "backgroundColor": {"red": 1.0, "green": 0.9, "blue": 0.9},
+                            "textFormat": {
+                                "bold": True,
+                                "foregroundColor": {"red": 1.0, "green": 0.0, "blue": 0.0}
+                            }
                         }
                     }
                 },
@@ -369,40 +504,6 @@ def apply_formatting(sheet, service, spreadsheet_id, worksheet_name, start_idx):
             }
         }    
     ]
-
-    dropdown_colors = {
-        "AI": {"red": 1.0000, "green": 1.0000, "blue": 0.8745},
-        "Storytelling": {"red": 0.7843, "green": 0.9294, "blue": 0.9686},
-    }
-
-    color_rules = [
-        {
-            "addConditionalFormatRule": {
-                "rule": {
-                    "ranges": [
-                        {
-                            "sheetId": sheet_id,
-                            "startRowIndex": 1,
-                            "endRowIndex": last_idx,
-                            "startColumnIndex": 3,
-                            "endColumnIndex": 4,
-                        }
-                    ],
-                    "booleanRule": {
-                        "condition": {
-                            "type": "TEXT_EQ",
-                            "values": [{"userEnteredValue": label}],
-                        },
-                        "format": {"backgroundColor": color},
-                    },
-                },
-                "index": idx,
-            }
-        }
-        for idx, (label, color) in enumerate(dropdown_colors.items())
-    ]
-
-    requests.extend(color_rules)
  
     service.spreadsheets().batchUpdate(
         spreadsheetId=spreadsheet_id, body={"requests": requests}
